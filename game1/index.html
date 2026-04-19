@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bank Muscat Jeopardy</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    .cat-header {
+      text-align: center;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 10px 4px;
+      border-bottom: 3px solid #111;
+      color: #111;
+    }
+
+    .cell {
+      background: #E8363A;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .cell:hover:not(.used) {
+      background: #c42d30;
+      transform: scale(1.03);
+    }
+
+    .cell.used {
+      background: #7a1c1e;
+      cursor: default;
+    }
+
+    .cell .pts {
+      font-size: 38px;
+      font-weight: 700;
+      color: white;
+      letter-spacing: 1px;
+    }
+
+    .cell.used .pts {
+      opacity: 0.35;
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 18px;
+      padding: 40px 36px 32px;
+      max-width: 580px;
+      width: 92%;
+      text-align: center;
+    }
+
+    .modal-pts {
+      background: #E8363A;
+      border-radius: 10px;
+      display: inline-block;
+      padding: 8px 30px;
+      color: white;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 22px;
+    }
+
+    .modal-q {
+      font-size: 21px;
+      font-weight: 600;
+      color: #E8363A;
+      line-height: 1.45;
+      white-space: pre-line;
+      margin-bottom: 8px;
+    }
+
+    .modal.answered {
+      border: 3px solid #E8363A;
+    }
+
+    .modal-hint {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 24px;
+    }
+
+    .modal-a {
+      background: #E8363A;
+      color: white;
+      font-size: 20px;
+      font-weight: 700;
+      border-radius: 10px;
+      padding: 16px 24px;
+      margin: 16px 0 20px;
+      display: none;
+      width: 100%;
+    }
+
+    .modal-a.visible {
+      display: block;
+    }
+
+    .btn {
+      display: inline-block;
+      background: #E8363A;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 11px 30px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 8px 4px 0;
+      transition: background 0.15s;
+    }
+
+    .btn:hover { background: #c42d30; }
+  </style>
+</head>
+<body>
+
+  <div class="grid" id="board"></div>
+
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <div class="modal-pts" id="modal-pts">100</div>
+      <div class="modal-q" id="modal-q"></div>
+      <div class="modal-hint" id="modal-hint">Press SPACE to reveal answer</div>
+      <div class="modal-a" id="modal-a"></div>
+      <div>
+        <button class="btn" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const categories = ['SPORT', 'BRAND', 'FAMOUS PEOPLE', 'CULTURE', 'FOOD'];
+    const points = [100, 200, 300, 400, 500];
+
+    const data = [
+      [
+        { q: 'These two animals are primarily used for racing competitions', a: 'Horses and Camels' },
+        { q: 'The cup in which Oman became champions in 2009', a: 'Gulf Cup' },
+        { q: 'The number of times Oman reached the finals in a football cup', a: '6' },
+        { q: 'The flying animal used in the sport in which small wild animals are hunted', a: 'Falcon' },
+        { q: 'The region in Oman in which the famous traditional sport of Bull-butting mainly takes place\n(Hint: Governorate)', a: 'Al-Batinah' },
+      ],
+      [
+        { q: 'The company previously known as Oman Overseas Trust Bank Ltd', a: 'Bank Muscat' },
+        { q: 'Ooredoo was previously known by this other name', a: 'Nawras' },
+        { q: 'The largest cement manufacturer in Oman', a: 'Raysut Cement Company' },
+        { q: "The parent company famous for producing Oman's most iconic chip brands like Chips Oman & Sohar Chips", a: 'Ali Shaihani Group of Industries' },
+        { q: 'The exact date Bank Muscat was founded', a: 'April 30, 1982' },
+      ],
+      [
+        { q: 'The football player that was in teams such as Al Hilal FC and Wigan Athletic', a: 'Ali Al Habsi' },
+        { q: 'This person is the current Minister of Education', a: 'Madeeha al Shibaniyah' },
+        { q: 'This person is a famous singer with works such as Qaboos and Ash Habib Al Shaab', a: 'Salah Al Zadjali' },
+        { q: "This person is often considered one of Oman's first influencers with a strong focus on lifestyle, fashion and travel", a: 'Naeema Al Maqbali' },
+        { q: 'This person is an author famous for producing works such as Celestial Bodies and Bitter Orange Tree: A Novel', a: 'Jokha Alharthi' },
+      ],
+      [
+        { q: 'This holiday is generally used to reward kids for fasting by giving them candy', a: 'Qaranqasho' },
+        { q: 'The date in which the Omani Renaissance Day occurred', a: '23rd of July 1970' },
+        { q: 'This ancient city is located in the Sur Region and is considered a World Heritage Site by UNESCO', a: 'Qalhat' },
+        { q: 'This dance is performed in which a solo dancer is accompanied by an encircling group with swords and guns as props', a: 'Al-azi' },
+        { q: 'This game involves people dodging a ball that is thrown between two people on both ends', a: "Ba'tha / بيضة" },
+      ],
+      [
+        { q: "The dish most commonly associated with being the national dish of Oman", a: 'Shuwa' },
+        { q: 'Which of these ingredients is NOT primarily used in making Traditional Omani Halwa?\na. Starch\nb. Butter\nc. Saffron\nd. Cardamom', a: 'Butter' },
+        { q: 'This common snack is consumed by birds and humans in which it ends with the food being spat out', a: 'Sunflower Seeds' },
+        { q: 'The Omani chip/corn curl brand that features two chickens on red packaging', a: 'Majid Crispy' },
+        { q: 'The flavour of the ice lolly/popsicle that featured a tiger on the cover with green packaging', a: 'Laban' },
+      ]
+    ];
+
+    const used = Array.from({ length: 5 }, () => Array(5).fill(false));
+    let currentCell = null;
+
+    function buildBoard() {
+      const board = document.getElementById('board');
+      categories.forEach(cat => {
+        const h = document.createElement('div');
+        h.className = 'cat-header';
+        h.textContent = cat;
+        board.appendChild(h);
+      });
+      for (let ri = 0; ri < 5; ri++) {
+        for (let ci = 0; ci < 5; ci++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.id = `c${ci}-${ri}`;
+          const span = document.createElement('span');
+          span.className = 'pts';
+          span.textContent = points[ri];
+          cell.appendChild(span);
+          cell.addEventListener('click', () => openModal(ci, ri, cell));
+          board.appendChild(cell);
+        }
+      }
+    }
+
+    function openModal(ci, ri, cell) {
+      if (used[ci][ri]) return;
+      currentCell = { ci, ri, cell };
+      document.getElementById('modal-pts').textContent = points[ri];
+      document.getElementById('modal-q').textContent = data[ci][ri].q;
+      document.getElementById('modal-a').textContent = data[ci][ri].a;
+      document.getElementById('modal-a').classList.remove('visible');
+      document.getElementById('modal-hint').style.display = '';
+      document.querySelector('.modal').classList.remove('answered');
+      document.getElementById('overlay').classList.add('active');
+    }
+
+    function revealAnswer() {
+      document.getElementById('modal-a').classList.add('visible');
+      document.getElementById('modal-hint').style.display = 'none';
+      document.querySelector('.modal').classList.add('answered');
+    }
+
+    function closeModal() {
+      if (currentCell) {
+        used[currentCell.ci][currentCell.ri] = true;
+        currentCell.cell.classList.add('used');
+      }
+      document.getElementById('overlay').classList.remove('active');
+      currentCell = null;
+    }
+
+    document.addEventListener('keydown', e => {
+      if (document.getElementById('overlay').classList.contains('active')) {
+        if (e.key === ' ') { e.preventDefault(); revealAnswer(); }
+        if (e.key === 'Escape') closeModal();
+      }
+    });
+
+    buildBoard();
+  </script>
+</body>
+</html>

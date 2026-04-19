@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bank Muscat Jeopardy 2</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    .cat-header {
+      text-align: center;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 10px 4px;
+      border-bottom: 3px solid #111;
+      color: #111;
+    }
+
+    .cell {
+      background: #E8363A;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .cell:hover:not(.used) {
+      background: #c42d30;
+      transform: scale(1.03);
+    }
+
+    .cell.used {
+      background: #7a1c1e;
+      cursor: default;
+    }
+
+    .cell .pts {
+      font-size: 38px;
+      font-weight: 700;
+      color: white;
+      letter-spacing: 1px;
+    }
+
+    .cell.used .pts {
+      opacity: 0.35;
+    }
+
+    /* Overlay */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 18px;
+      padding: 40px 36px 32px;
+      max-width: 580px;
+      width: 92%;
+      text-align: center;
+    }
+
+    .modal-pts {
+      background: #E8363A;
+      border-radius: 10px;
+      display: inline-block;
+      padding: 8px 30px;
+      color: white;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 22px;
+    }
+
+    .modal-q {
+      font-size: 21px;
+      font-weight: 600;
+      color: #E8363A;
+      line-height: 1.45;
+      white-space: pre-line;
+      margin-bottom: 8px;
+    }
+
+    .modal-img {
+      width: 100%;
+      max-height: 240px;
+      object-fit: contain;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      display: none;
+    }
+
+    .modal-img.visible {
+      display: block;
+    }
+
+    .modal.answered {
+      border: 3px solid #E8363A;
+    }
+
+    .modal-hint {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 24px;
+    }
+
+    .modal-a {
+      background: #E8363A;
+      color: white;
+      font-size: 20px;
+      font-weight: 700;
+      border-radius: 10px;
+      padding: 16px 24px;
+      margin: 16px 0 20px;
+      display: none;
+      width: 100%;
+    }
+
+    .modal-a.visible {
+      display: block;
+    }
+
+    .btn {
+      display: inline-block;
+      background: #E8363A;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 11px 30px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 8px 4px 0;
+      transition: background 0.15s;
+    }
+
+    .btn:hover { background: #c42d30; }
+  </style>
+</head>
+<body>
+
+  <div class="grid" id="board"></div>
+
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <div class="modal-pts" id="modal-pts">100</div>
+      <img class="modal-img" id="modal-img" src="" alt="Money bill" />
+      <div class="modal-q" id="modal-q"></div>
+      <div class="modal-hint" id="modal-hint">Press SPACE to reveal answer</div>
+      <div class="modal-a" id="modal-a"></div>
+      <div>
+        <button class="btn" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const categories = ['IT ACRONYMS', 'MONEY BILLS', 'WHITE & RED', 'COUNTRY CURRENCY', 'IT PHRASES BUT NOT REALLY'];
+    const points = [100, 200, 300, 400, 500];
+
+    const data = [
+      [
+        { q: 'RAM', a: 'Random Access Memory' },
+        { q: 'VPN', a: 'Virtual Private Network' },
+        { q: 'HTTP', a: 'Hypertext Transfer Protocol' },
+        { q: 'IP', a: 'Internet Protocol' },
+        { q: 'FTP', a: 'File Transfer Protocol' },
+      ],
+      [
+        { img: 'images/1-rial.jpg', a: '1 Rial' },
+        { img: 'images/5-rials.jpg', a: '5 Rials' },
+        { img: 'images/200-baisa.jpg', a: '200 Baisa' },
+        { img: 'images/20-rials.jpg', a: '20 Rials' },
+        { img: 'images/50-rials.jpg', a: '50 Rials' },
+      ],
+      [
+        { q: 'This company makes one of the famous soft drinks of all time', a: 'Coca Cola' },
+        { q: "This country's flag features a maple leaf on it", a: 'Canada' },
+        { q: 'This football club is home to players like Thierry Henry, Mesut Özil and Bukayo Saka', a: 'Arsenal FC' },
+        { q: 'Telecom company originating from Qatar but with influence all across the Middle East', a: 'Ooredoo' },
+        { q: 'A box that contains items like bandages and plasters used to treat injuries', a: 'First Aid Kit' },
+      ],
+      [
+        { q: 'AED', a: 'United Arab Emirates (UAE)' },
+        { q: 'JPY', a: 'Japan' },
+        { q: 'NZD', a: 'New Zealand' },
+        { q: 'KES', a: 'Kenya' },
+        { q: 'IDR', a: 'Indonesia' },
+      ],
+      [
+        { q: 'A small insect is known as a ___', a: 'Bug' },
+        { q: 'The act of capturing marine animals is known as', a: 'Fishing / Phishing' },
+        { q: 'The infamous gift that the Greeks "gifted" to the people of Troy', a: 'Trojan' },
+        { q: 'Cirrus, Alto and Nimbus are classifications of what weather phenomenon', a: 'Cloud' },
+        { q: "To treat someone's injuries or repair the damage to something in an improvised way", a: 'Patching' },
+      ]
+    ];
+
+    const used = Array.from({ length: 5 }, () => Array(5).fill(false));
+    let currentCell = null;
+
+    function buildBoard() {
+      const board = document.getElementById('board');
+
+      categories.forEach(cat => {
+        const h = document.createElement('div');
+        h.className = 'cat-header';
+        h.textContent = cat;
+        board.appendChild(h);
+      });
+
+      for (let ri = 0; ri < 5; ri++) {
+        for (let ci = 0; ci < 5; ci++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.id = `c${ci}-${ri}`;
+          const span = document.createElement('span');
+          span.className = 'pts';
+          span.textContent = points[ri];
+          cell.appendChild(span);
+          cell.addEventListener('click', () => openModal(ci, ri, cell));
+          board.appendChild(cell);
+        }
+      }
+    }
+
+    function openModal(ci, ri, cell) {
+      if (used[ci][ri]) return;
+      currentCell = { ci, ri, cell };
+      const entry = data[ci][ri];
+      const imgEl = document.getElementById('modal-img');
+      const qEl = document.getElementById('modal-q');
+
+      document.getElementById('modal-pts').textContent = points[ri];
+      document.getElementById('modal-a').textContent = entry.a;
+      document.getElementById('modal-a').classList.remove('visible');
+      document.getElementById('modal-hint').style.display = '';
+      document.querySelector('.modal').classList.remove('answered');
+
+      if (entry.img) {
+        imgEl.src = entry.img;
+        imgEl.classList.add('visible');
+        qEl.textContent = '';
+        qEl.style.display = 'none';
+      } else {
+        imgEl.src = '';
+        imgEl.classList.remove('visible');
+        qEl.textContent = entry.q;
+        qEl.style.display = '';
+      }
+
+      document.getElementById('overlay').classList.add('active');
+    }
+
+    function revealAnswer() {
+      document.getElementById('modal-a').classList.add('visible');
+      document.getElementById('modal-hint').style.display = 'none';
+      document.querySelector('.modal').classList.add('answered');
+    }
+
+    function closeModal() {
+      if (currentCell) {
+        used[currentCell.ci][currentCell.ri] = true;
+        currentCell.cell.classList.add('used');
+      }
+      document.getElementById('overlay').classList.remove('active');
+      currentCell = null;
+    }
+
+    document.addEventListener('keydown', e => {
+      if (document.getElementById('overlay').classList.contains('active')) {
+        if (e.key === ' ') { e.preventDefault(); revealAnswer(); }
+        if (e.key === 'Escape') closeModal();
+      }
+    });
+
+    buildBoard();
+  </script>
+</body>
+</html>

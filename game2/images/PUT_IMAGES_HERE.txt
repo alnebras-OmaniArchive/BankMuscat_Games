@@ -1,0 +1,11 @@
+Add your Omani currency bill images to this folder.
+
+Required filenames (must match exactly):
+- 1-rial.jpg
+- 5-rials.jpg
+- 200-baisa.jpg
+- 20-rials.jpg
+- 50-rials.jpg
+
+Supported formats: .jpg, .png, or .webp
+If you use a different format, update the file extensions in game2/index.html under the "Money Bills" data array.
