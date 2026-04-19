@@ -86,34 +86,36 @@
     .modal {
       background: white;
       border-radius: 18px;
-      padding: 40px 36px 32px;
-      max-width: 580px;
-      width: 92%;
+      padding: 48px 56px 40px;
+      width: 1100px;
+      max-width: 96vw;
+      height: 90vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       text-align: center;
+      border: 3px solid #E8363A;
     }
 
     .modal-pts {
       background: #E8363A;
       border-radius: 10px;
       display: inline-block;
-      padding: 8px 30px;
+      padding: 10px 36px;
       color: white;
-      font-size: 28px;
+      font-size: 34px;
       font-weight: 700;
-      margin-bottom: 22px;
+      margin-bottom: 32px;
     }
 
     .modal-q {
-      font-size: 21px;
+      font-size: 42px;
       font-weight: 600;
       color: #E8363A;
-      line-height: 1.45;
+      line-height: 1.4;
       white-space: pre-line;
       margin-bottom: 8px;
-    }
-
-    .modal.answered {
-      border: 3px solid #E8363A;
     }
 
     .modal-hint {
@@ -125,10 +127,10 @@
     .modal-a {
       background: #E8363A;
       color: white;
-      font-size: 20px;
+      font-size: 42px;
       font-weight: 700;
       border-radius: 10px;
-      padding: 16px 24px;
+      padding: 24px 32px;
       margin: 16px 0 20px;
       display: none;
       width: 100%;
@@ -188,7 +190,7 @@
         { q: 'Ooredoo was previously known by this other name', a: 'Nawras' },
         { q: 'The largest cement manufacturer in Oman', a: 'Raysut Cement Company' },
         { q: "The parent company famous for producing Oman's most iconic chip brands like Chips Oman & Sohar Chips", a: 'Ali Shaihani Group of Industries' },
-        { q: 'The exact date Bank Muscat was founded', a: 'April 30, 1982' },
+        { q: 'The exact date Bank Muscat was founded (DD/MM/YYYY)', a: '30/04/1982' },
       ],
       [
         { q: 'The football player that was in teams such as Al Hilal FC and Wigan Athletic', a: 'Ali Al Habsi' },
@@ -247,14 +249,12 @@
       document.getElementById('modal-a').textContent = data[ci][ri].a;
       document.getElementById('modal-a').classList.remove('visible');
       document.getElementById('modal-hint').style.display = '';
-      document.querySelector('.modal').classList.remove('answered');
       document.getElementById('overlay').classList.add('active');
     }
 
     function revealAnswer() {
       document.getElementById('modal-a').classList.add('visible');
       document.getElementById('modal-hint').style.display = 'none';
-      document.querySelector('.modal').classList.add('answered');
     }
 
     function closeModal() {
