@@ -87,35 +87,41 @@
     .modal {
       background: white;
       border-radius: 18px;
-      padding: 40px 36px 32px;
-      max-width: 580px;
-      width: 92%;
+      padding: 48px 56px 40px;
+      width: 1100px;
+      max-width: 96vw;
+      height: 90vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       text-align: center;
+      border: 3px solid #E8363A;
     }
 
     .modal-pts {
       background: #E8363A;
       border-radius: 10px;
       display: inline-block;
-      padding: 8px 30px;
+      padding: 10px 36px;
       color: white;
-      font-size: 28px;
+      font-size: 34px;
       font-weight: 700;
-      margin-bottom: 22px;
+      margin-bottom: 32px;
     }
 
     .modal-q {
-      font-size: 21px;
+      font-size: 42px;
       font-weight: 600;
       color: #E8363A;
-      line-height: 1.45;
+      line-height: 1.4;
       white-space: pre-line;
       margin-bottom: 8px;
     }
 
     .modal-img {
       width: 100%;
-      max-height: 240px;
+      max-height: 340px;
       object-fit: contain;
       border-radius: 10px;
       margin-bottom: 8px;
@@ -124,10 +130,6 @@
 
     .modal-img.visible {
       display: block;
-    }
-
-    .modal.answered {
-      border: 3px solid #E8363A;
     }
 
     .modal-hint {
@@ -139,10 +141,10 @@
     .modal-a {
       background: #E8363A;
       color: white;
-      font-size: 20px;
+      font-size: 42px;
       font-weight: 700;
       border-radius: 10px;
-      padding: 16px 24px;
+      padding: 24px 32px;
       margin: 16px 0 20px;
       display: none;
       width: 100%;
@@ -199,11 +201,11 @@
         { q: 'FTP', a: 'File Transfer Protocol' },
       ],
       [
-        { img: 'images/1-rial.jpg', a: '1 Rial' },
-        { img: 'images/5-rials.jpg', a: '5 Rials' },
-        { img: 'images/200-baisa.jpg', a: '200 Baisa' },
-        { img: 'images/20-rials.jpg', a: '20 Rials' },
-        { img: 'images/50-rials.jpg', a: '50 Rials' },
+        { img: 'images/1-rial.jpg.png', a: '1 Rial' },
+        { img: 'images/5-rials.jpg.png', a: '5 Rials' },
+        { img: 'images/200-baisa.png', a: '200 Baisa' },
+        { img: 'images/20-rials.png', a: '20 Rials' },
+        { img: 'images/50-rials.png', a: '50 Rials' },
       ],
       [
         { q: 'This company makes one of the famous soft drinks of all time', a: 'Coca Cola' },
@@ -267,7 +269,6 @@
       document.getElementById('modal-a').textContent = entry.a;
       document.getElementById('modal-a').classList.remove('visible');
       document.getElementById('modal-hint').style.display = '';
-      document.querySelector('.modal').classList.remove('answered');
 
       if (entry.img) {
         imgEl.src = entry.img;
@@ -287,7 +288,6 @@
     function revealAnswer() {
       document.getElementById('modal-a').classList.add('visible');
       document.getElementById('modal-hint').style.display = 'none';
-      document.querySelector('.modal').classList.add('answered');
     }
 
     function closeModal() {
